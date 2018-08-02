@@ -100,8 +100,10 @@ public class CourseActivity extends AppCompatActivity {
                     return;
                 }
                 if (mRecorder.isPaused) {
+                    mRecorder.isPaused = !mRecorder.isPaused;
                     resumeRecorder();
                 } else {
+                    mRecorder.isPaused = !mRecorder.isPaused;
                     pauseRecorder();
                 }
 
@@ -201,7 +203,7 @@ public class CourseActivity extends AppCompatActivity {
 
     private void pauseRecorder() {
 
-        mRecorder.start();
+//        mRecorder.start();
         pauseBtn.setText("继续录制");
         toast("暂停录制");
 
@@ -211,7 +213,7 @@ public class CourseActivity extends AppCompatActivity {
 
     private void resumeRecorder() {
 
-        mRecorder.start();
+//        mRecorder.start();
         pauseBtn.setText("暂停录制");
         toast("继续录制");
 
@@ -317,7 +319,9 @@ public class CourseActivity extends AppCompatActivity {
 
     private void onClickLeft() {
         position--;
-
+        if (position>=fileList.size() || position<0){
+            return;
+        }
         imageView.setImageURI(Uri.fromFile(fileList.get(position)));
         if (position == fileList.size()) {
             position = 0;

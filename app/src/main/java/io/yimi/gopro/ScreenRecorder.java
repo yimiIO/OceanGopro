@@ -137,6 +137,8 @@ public class ScreenRecorder implements Serializable{
     private static final int MSG_START = 0;
     private static final int MSG_STOP = 1;
     private static final int MSG_ERROR = 2;
+    private static final int MSG_PAUSE = 3;
+    private static final int MSG_RESUME = 4;
     private static final int STOP_WITH_EOS = 1;
 
     private class CallbackHandler extends Handler {
@@ -157,6 +159,12 @@ public class ScreenRecorder implements Serializable{
                     } catch (Exception e) {
                         msg.obj = e;
                     }
+                case MSG_PAUSE:
+                    pauseEncoders();
+                    break;
+                case MSG_RESUME:
+                    resumeEncoders();
+                    break;
                 case MSG_STOP:
                 case MSG_ERROR:
                     stopEncoders();
@@ -371,6 +379,10 @@ public class ScreenRecorder implements Serializable{
 
             @Override
             public void onOutputBufferAvailable(BaseEncoder codec, int index, MediaCodec.BufferInfo info) {
+                Log.e("eeeeeeev:"+isPaused+":",index+"");
+                if (isPaused){
+                    return;
+                }
                 if (VERBOSE) Log.i(TAG, "VideoEncoder output buffer available: index=" + index);
                 try {
                     muxVideo(index, info);
@@ -405,6 +417,11 @@ public class ScreenRecorder implements Serializable{
 
             @Override
             public void onOutputBufferAvailable(BaseEncoder codec, int index, MediaCodec.BufferInfo info) {
+                Log.e("eeeeeeea:"+isPaused+":",index+"");
+                if (isPaused){
+                    return;
+                }
+
                 if (VERBOSE)
                     Log.i(TAG, "[" + Thread.currentThread().getId() + "] AudioEncoder output buffer available: index=" + index);
                 try {
@@ -441,6 +458,15 @@ public class ScreenRecorder implements Serializable{
         mHandler.sendMessageAtFrontOfQueue(msg);
     }
 
+
+    private void pauseEncoders() {
+
+
+    }
+    private void resumeEncoders() {
+
+
+    }
     private void stopEncoders() {
         mIsRunning.set(false);
         mPendingAudioEncoderBufferInfos.clear();
