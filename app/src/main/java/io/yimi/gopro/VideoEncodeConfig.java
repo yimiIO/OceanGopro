@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Yrom Wang <http://www.Eavn.net>
+ * Copyright (c) 2017 Eavn <http://www.Eavn.net>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,19 +22,21 @@ import android.media.MediaFormat;
 import java.io.Serializable;
 import java.util.Objects;
 
+import io.yimi.gopro.util.Utils;
+
 /**
  * @author Eavn
- * @version 2018/07/3
+ * @version 2018/07/31
  */
 public class VideoEncodeConfig implements Serializable{
-    final int width;
-    final int height;
-    final int bitrate;
-    final int framerate;
-    final int iframeInterval;
-    final String codecName;
-    final String mimeType;
-    final MediaCodecInfo.CodecProfileLevel codecProfileLevel;
+    public final int width;
+    public final int height;
+    public final int bitrate;
+    public final int framerate;
+    public final int iframeInterval;
+    public final String codecName;
+    public final String mimeType;
+    public final MediaCodecInfo.CodecProfileLevel codecProfileLevel;
 
     /**
      * @param codecName         selected codec name, maybe null

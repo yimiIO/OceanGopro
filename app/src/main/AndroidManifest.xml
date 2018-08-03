@@ -25,6 +25,12 @@
             android:name=".CourseActivity"
             android:screenOrientation="landscape"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar"></activity>
+
+        <service
+            android:name=".service.ScreenRecorderService"
+            android:enabled="true"
+            android:exported="false" >
+        </service>
     </application>
 
 </manifest>

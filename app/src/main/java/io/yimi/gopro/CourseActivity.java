@@ -2,20 +2,15 @@ package io.yimi.gopro;
 
 import android.annotation.TargetApi;
 import android.app.AlertDialog;
-import android.content.ActivityNotFoundException;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.pm.PackageManager;
-import android.media.projection.MediaProjection;
 import android.media.projection.MediaProjectionManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Looper;
-import android.os.StrictMode;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -35,35 +30,33 @@ import java.util.Locale;
 import static android.Manifest.permission.RECORD_AUDIO;
 import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
 import static android.os.Build.VERSION_CODES.M;
-import static io.yimi.gopro.MainActivity.ACTION_STOP;
-import static io.yimi.gopro.ScreenRecorder.VIDEO_AVC;
 
 
 public class CourseActivity extends AppCompatActivity {
 
+    private static final int REQUEST_MEDIA_PROJECTION = 1;
+    private static final int REQUEST_PERMISSIONS = 2;
+    File file;
+    ScreenRecorder mRecorder;
+    VideoEncodeConfig videoEncodeConfig;
+    AudioEncodeConfig audioEncodeConfig;
     private Button startBtn;
     private Button pauseBtn;
-
     private ImageView imageView;
     private int position;
     private List<File> fileList = new ArrayList<>();
-    File file;
-    ScreenRecorder mRecorder;
-
-    private static final int REQUEST_MEDIA_PROJECTION = 1;
-
-    private static final int REQUEST_PERMISSIONS = 2;
     private MediaProjectionManager mMediaProjectionManager;
 
-    VideoEncodeConfig videoEncodeConfig;
-    AudioEncodeConfig audioEncodeConfig;
+    private static File getSavingDir() {
+        return new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MOVIES),
+                "ScreenCaptures");
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.activity_course);
-        mMediaProjectionManager = (MediaProjectionManager) getApplicationContext().getSystemService(MEDIA_PROJECTION_SERVICE);
 
         Intent intent = getIntent();
         videoEncodeConfig = (VideoEncodeConfig) intent.getSerializableExtra("video");
@@ -77,7 +70,7 @@ public class CourseActivity extends AppCompatActivity {
 
 
                 if (mRecorder != null) {
-                    toast("保存成功："+mRecorder.getSavedPath());
+                    toast("保存成功：" + mRecorder.getSavedPath());
                     stopRecorder();
                 } else if (hasPermissions()) {
                     startCaptureIntent();
@@ -146,21 +139,6 @@ public class CourseActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == REQUEST_MEDIA_PROJECTION) {
-            // NOTE: Should pass this result data into a Service to run ScreenRecorder.
-            // The following codes are merely exemplary.
-
-            MediaProjection mediaProjection = mMediaProjectionManager.getMediaProjection(resultCode, data);
-            if (mediaProjection == null) {
-                Log.e("@@", "media projection is null");
-                return;
-            }
-
-
-            if (videoEncodeConfig == null) {
-                toast("Create ScreenRecorder failure");
-                mediaProjection.stop();
-                return;
-            }
 
             File dir = getSavingDir();
             if (!dir.exists() && !dir.mkdirs()) {
@@ -171,77 +149,67 @@ public class CourseActivity extends AppCompatActivity {
             final File file = new File(dir, "Screen-" + format.format(new Date())
                     + "-" + videoEncodeConfig.width + "x" + videoEncodeConfig.height + ".mp4");
             Log.d("@@", "Create recorder with :" + videoEncodeConfig + " \n " + audioEncodeConfig + "\n " + file);
-            mRecorder = newRecorder(mediaProjection, videoEncodeConfig, audioEncodeConfig, file);
+            mRecorder = newRecorder(videoEncodeConfig, audioEncodeConfig, file);
             if (hasPermissions()) {
-                startRecorder();
+                startRecorder(resultCode, data);
             } else {
                 cancelRecorder();
             }
         }
     }
 
-    private static File getSavingDir() {
-        return new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MOVIES),
-                "ScreenCaptures");
-    }
-
     private void startCaptureIntent() {
-        Intent captureIntent = mMediaProjectionManager.createScreenCaptureIntent();
-        startActivityForResult(captureIntent, REQUEST_MEDIA_PROJECTION);
+
+
+        final MediaProjectionManager manager
+                = (MediaProjectionManager)getSystemService(Context.MEDIA_PROJECTION_SERVICE);
+        final Intent permissionIntent = manager.createScreenCaptureIntent();
+        startActivityForResult(permissionIntent, REQUEST_MEDIA_PROJECTION);
     }
 
-    private void startRecorder() {
+    private void startRecorder(final int resultCode, final Intent data) {
         if (mRecorder == null) {
             return;
         }
-        mRecorder.start();
+        mRecorder.startRecord(resultCode, data);
         startBtn.setText("停止录制");
-
-
-
     }
 
     private void pauseRecorder() {
-
-//        mRecorder.start();
+        mRecorder.pauseRecord();
         pauseBtn.setText("继续录制");
         toast("暂停录制");
-
-
-
     }
 
     private void resumeRecorder() {
-
-//        mRecorder.start();
+        mRecorder.resumeRecord();
         pauseBtn.setText("暂停录制");
         toast("继续录制");
-
-
     }
 
     private void cancelRecorder() {
-        if (mRecorder == null) return;
+        if (mRecorder == null) {
+            return;
+        }
         Toast.makeText(this, "Permission denied! Screen recorder is cancel", Toast.LENGTH_SHORT).show();
         stopRecorder();
     }
 
     private void stopRecorder() {
+        Log.e("OcceanGopro","stopRecoder");
+
 
         if (mRecorder != null) {
-            mRecorder.quit();
+            mRecorder.stopRecord();
         }
         mRecorder = null;
         startBtn.setText("开始录制");
-
-
-
     }
 
-    private ScreenRecorder newRecorder(MediaProjection mediaProjection, VideoEncodeConfig video,
+    private ScreenRecorder newRecorder(VideoEncodeConfig video,
                                        AudioEncodeConfig audio, File output) {
-        ScreenRecorder r = new ScreenRecorder(video, audio,
-                1, mediaProjection, output.getAbsolutePath());
+        ScreenRecorder r = new ScreenRecorder(this, video, audio,
+                1, output.getAbsolutePath());
         r.setCallback(new ScreenRecorder.Callback() {
             long startTime = 0;
 
@@ -319,7 +287,7 @@ public class CourseActivity extends AppCompatActivity {
 
     private void onClickLeft() {
         position--;
-        if (position>=fileList.size() || position<0){
+        if (position >= fileList.size() || position < 0) {
             return;
         }
         imageView.setImageURI(Uri.fromFile(fileList.get(position)));
@@ -355,11 +323,11 @@ public class CourseActivity extends AppCompatActivity {
 
     @Override
     protected void onDestroy() {
+        Log.e("OcceanGopro","onDestory");
         super.onDestroy();
         stopRecorder();
 
     }
-
 
 
 }

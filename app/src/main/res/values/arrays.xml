@@ -7,6 +7,12 @@
         <item>1280x720</item>
         <item>1920x1080</item>
         <item>3860x2160</item>
+        <item>360x480</item>
+        <item>480x720</item>
+        <item>720x1080</item>
+        <item>1080x1920</item>
+        <item>2160x3860</item>
+
     </string-array>
     <!-- audio channel counts-->
     <string-array name="audio_channels">
