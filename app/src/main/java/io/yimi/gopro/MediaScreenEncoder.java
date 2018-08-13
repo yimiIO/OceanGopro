@@ -20,7 +20,7 @@ import io.yimi.gopro.util.EglTask;
 import io.yimi.gopro.util.GLDrawer2D;
 
 public class MediaScreenEncoder extends MediaVideoEncoderBase {
-	private static final boolean DEBUG = false;	// TODO set false on release
+	private static final boolean DEBUG = false;
 	private static final String TAG = MediaScreenEncoder.class.getSimpleName();
 
 	private static final String MIME_TYPE = MediaFormat.MIMETYPE_VIDEO_AVC;
@@ -77,9 +77,7 @@ public class MediaScreenEncoder extends MediaVideoEncoderBase {
 
 	@Override
 	void stopRecording() {
-		if (DEBUG) {
-			Log.v(TAG,  "stopRecording:");
-		}
+		if (DEBUG) Log.v(TAG,  "stopRecording:");
 		synchronized (mSync) {
 			mIsRecording = false;
 			mSync.notifyAll();
@@ -224,11 +222,11 @@ public class MediaScreenEncoder extends MediaVideoEncoderBase {
 						mSourceTexture.updateTexImage();
 						mSourceTexture.getTransformMatrix(mTexMatrix);
 					}
-					// SurfaceTextureで受け取った画像をMediaCodecの入力用Surfaceへ描画する
+					// SurfaceTexture绘制Surface中接收的图像以输入MediaCodec......
 					mEncoderSurface.makeCurrent();
 					mDrawer.draw(mTexId, mTexMatrix, 0);
 			    	mEncoderSurface.swap();
-			    	// EGL保持用のオフスクリーンに描画しないとハングアップする機種の為のworkaround
+			    	// 对于未在屏幕外绘制以保持EGL而挂起的模型的解决方法
 					makeCurrent();
 					GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
 					GLES20.glFlush();

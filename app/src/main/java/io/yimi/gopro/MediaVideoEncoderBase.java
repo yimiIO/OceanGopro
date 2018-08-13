@@ -28,7 +28,7 @@ public abstract class MediaVideoEncoderBase extends MediaEncoder {
 	}
 
 	/**
-	 * エンコーダー用のMediaFormatを生成する。prepare_surface_encoder内から呼び出される
+	 * 为编码器生成MediaFormat。 从prepare_surface_encoder中调用
 	 * @param mime
 	 * @param frame_rate
 	 * @param bitrate

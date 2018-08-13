@@ -11,6 +11,7 @@
         <item>480x720</item>
         <item>720x1080</item>
         <item>1080x1920</item>
+        <item>1080x1440</item>
         <item>2160x3860</item>
 
     </string-array>

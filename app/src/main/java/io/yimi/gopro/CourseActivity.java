@@ -14,6 +14,7 @@ import android.os.Looper;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.MotionEvent;
+import android.view.Surface;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
@@ -286,22 +287,22 @@ public class CourseActivity extends AppCompatActivity {
     }
 
     private void onClickLeft() {
-        position--;
-        if (position >= fileList.size() || position < 0) {
+        if ( position-1 < 0) {
             return;
         }
-        imageView.setImageURI(Uri.fromFile(fileList.get(position)));
+        position--;
+//        imageView.setImageURI(Uri.fromFile(fileList.get(position)));
         if (position == fileList.size()) {
             position = 0;
         }
     }
 
     private void onClickRight() {
-        position++;
-        if (position >= fileList.size()) {
+        if (position+1 >= fileList.size()) {
             return;
         }
-        imageView.setImageURI(Uri.fromFile(fileList.get(position)));
+        position++;
+//        imageView.setImageURI(Uri.fromFile(fileList.get(position)));
         if (position == fileList.size()) {
             position = 0;
         }
